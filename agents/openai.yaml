@@ -1,0 +1,4 @@
+interface:
+  display_name: "Question Page Generator"
+  short_description: "根据题目图片自动识别题型并生成打印版和在线练习版网页"
+  default_prompt: "Use $question-page-generator to create an interactive practice page from this question image."

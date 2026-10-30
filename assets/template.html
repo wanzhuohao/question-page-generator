@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>练习题</title>
+<style>
+/* ===== Reset & Base ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #2563eb;
+  --primary-light: #dbeafe;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --gray-bg: #f1f5f9;
+  --gray-border: #e2e8f0;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--gray-bg);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+/* ===== Mode Toggle Bar ===== */
+.mode-bar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; padding: 12px 20px;
+  border-bottom: 1px solid var(--gray-border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.mode-toggle { display: flex; gap: 0; border: 2px solid var(--primary); border-radius: 8px; overflow: hidden; }
+.mode-btn {
+  padding: 8px 20px; border: none; background: #fff; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--primary);
+  transition: all 0.2s;
+}
+.mode-btn.active { background: var(--primary); color: #fff; }
+.mode-info { font-size: 13px; color: var(--text-muted); }
+
+/* ===== Print Mode ===== */
+.print-area { max-width: 800px; margin: 20px auto; padding: 0 16px; }
+.print-header {
+  text-align: center; margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 2px solid #333;
+}
+.print-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.print-meta { display: flex; justify-content: center; gap: 32px; font-size: 14px; color: #555; margin-bottom: 6px; }
+.print-meta span { white-space: nowrap; }
+.print-count { font-size: 14px; color: #666; }
+.print-count strong { font-size: 16px; color: #333; }
+.print-questions { background: #fff; padding: 28px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.print-questions.grid-mode {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 24px;
+  font-size: 16px;
+  line-height: 2.2;
+}
+.print-questions.grid-mode .print-question { border-bottom: none; padding: 0; }
+.print-question { padding: 8px 0; border-bottom: 1px dashed #ddd; font-size: 16px; }
+.print-question:last-child { border-bottom: none; }
+
+/* Answer area */
+.print-answer-area {
+  margin-top: 20px; padding-top: 14px; border-top: 2px solid #333;
+}
+.print-answer-area .label { font-weight: 700; margin-bottom: 8px; font-size: 15px; }
+.print-answer-list { columns: 3; font-size: 14px; color: #666; }
+.print-answer-list li { margin-bottom: 4px; break-inside: avoid; }
+
+/* Action buttons in print mode */
+.print-actions {
+  display: flex; gap: 12px; justify-content: center; margin-top: 20px;
+}
+
+/* ===== Online Practice Mode ===== */
+.practice-area { max-width: 720px; margin: 20px auto; padding: 0 16px; }
+.practice-header {
+  background: #fff; padding: 16px 20px; border-radius: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.practice-stats { display: flex; gap: 20px; font-size: 14px; }
+.practice-stats .stat { text-align: center; }
+.practice-stats .stat-value { font-size: 20px; font-weight: 700; color: var(--primary); }
+.practice-stats .stat-label { font-size: 12px; color: var(--text-muted); }
+.timer { font-size: 18px; font-weight: 700; color: var(--danger); font-variant-numeric: tabular-nums; }
+
+.question-card {
+  background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.question-card .q-num { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; }
+.question-card .q-body { font-size: 18px; font-weight: 500; }
+.question-card .q-answer-input {
+  margin-top: 12px; display: flex; gap: 8px; align-items: center;
+}
+.question-card input[type="text"], .question-card input[type="number"] {
+  padding: 8px 12px; border: 2px solid var(--gray-border); border-radius: 6px;
+  font-size: 16px; width: 120px; transition: border-color 0.2s;
+}
+.question-card input:focus { outline: none; border-color: var(--primary); }
+.question-card .q-correct { color: var(--success); font-weight: 700; }
+.question-card .q-wrong { color: var(--danger); font-weight: 700; }
+
+/* ===== Shape / Graphic Layout ===== */
+/* Grid (hundredChart etc.) */
+.shape-grid { display: grid; gap: 6px; margin-top: 14px; }
+.shape-grid-cell {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px;
+  border: 1px solid var(--gray-border); border-radius: 6px;
+  font-size: 18px; font-weight: 500;
+  background: #f8fafc;
+}
+.shape-grid-cell input {
+  width: 44px; text-align: center;
+  border: none; border-bottom: 2px solid var(--primary);
+  font-size: 18px; padding: 2px; background: transparent;
+}
+.shape-grid-cell input:focus { outline: none; border-bottom-color: var(--primary); }
+
+/* Triangle (6 positions: A top, B left-bottom, C right-bottom, AB/BC/AC midpoints) */
+.shape-triangle { position: relative; width: 220px; height: 200px; margin: 16px auto; }
+.shape-triangle-cell {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 17px; font-weight: 500;
+  background: #f0f9ff;
+}
+.shape-triangle-cell input {
+  width: 44px; text-align: center;
+  border: none; border-bottom: 2px solid var(--primary);
+  font-size: 17px; padding: 2px; background: transparent;
+}
+.shape-triangle-line { position: absolute; border-top: 2px solid var(--gray-border); }
+
+/* Square (8 positions: 4 corners + 4 edge midpoints) */
+.shape-square { position: relative; width: 220px; height: 220px; margin: 16px auto; }
+.shape-square-cell {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px;
+  border-radius: 50%;
+  font-size: 17px; font-weight: 500;
+  background: #f0f9ff;
+}
+.shape-square-cell input {
+  width: 44px; text-align: center;
+  border: none; border-bottom: 2px solid var(--primary);
+  font-size: 17px; padding: 2px; background: transparent;
+}
+.shape-square-line { position: absolute; border-top: 2px solid var(--gray-border); }
+
+/* Shape target info */
+.shape-target { text-align: center; font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+
+/* Choice buttons */
+.choice-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.choice-btn {
+  padding: 10px 16px; border: 2px solid var(--gray-border); border-radius: 8px;
+  background: #fff; cursor: pointer; font-size: 16px; transition: all 0.2s;
+}
+.choice-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+.choice-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.choice-btn.correct { border-color: var(--success); background: #dcfce7; }
+.choice-btn.wrong { border-color: var(--danger); background: #fee2e2; }
+
+/* Action buttons */
+.action-row { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+.btn {
+  padding: 10px 28px; border: none; border-radius: 8px; cursor: pointer;
+  font-size: 15px; font-weight: 600; transition: opacity 0.2s;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-outline { background: #fff; color: var(--primary); border: 2px solid var(--primary); }
+
+/* Result panel */
+.result-panel {
+  background: #fff; padding: 32px; border-radius: 8px; text-align: center;
+  margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.result-panel .score-big { font-size: 48px; font-weight: 800; color: var(--primary); margin: 12px 0; }
+.result-panel .result-detail { font-size: 16px; color: var(--text-muted); margin-bottom: 20px; }
+
+/* ===== Hidden by default ===== */
+.hidden { display: none !important; }
+
+/* ===== Print CSS ===== */
+@media print {
+  body { background: #fff; }
+  .mode-bar, .practice-area, .no-print { display: none !important; }
+  .print-area { max-width: none; margin: 0; padding: 0; }
+  .print-questions { box-shadow: none; border: none; padding: 0; }
+  .print-questions.grid-mode { grid-template-columns: repeat(3, 1fr); }
+  .print-answer-area { display: block !important; }
+  .print-answer-list { columns: 3; }
+  .print-actions { display: none !important; }
+  @page { margin: 12mm; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mode Toggle Bar -->
+<div class="mode-bar no-print">
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btnPrintMode" onclick="switchMode('print')">打印版本</button>
+    <button class="mode-btn" id="btnPracticeMode" onclick="switchMode('practice')">在线练习</button>
+  </div>
+  <div class="mode-info" id="modeInfo"></div>
+</div>
+
+<!-- Print Mode -->
+<div class="print-area" id="printMode">
+  <div class="print-header">
+    <div class="print-title" id="printTitle">练习题</div>
+    <div class="print-meta">
+      <span>姓名：___________</span>
+      <span>班级：___________</span>
+      <span>分数：___________</span>
+    </div>
+    <div class="print-count">共 <strong id="printCount">0</strong> 题</div>
+  </div>
+  <div class="print-questions" id="printQuestions"></div>
+  <div class="print-answer-area" id="printAnswerArea" style="display:none;">
+    <div class="label">参考答案：</div>
+    <ol class="print-answer-list" id="printAnswers"></ol>
+  </div>
+  <div class="print-actions no-print">
+    <button class="btn btn-primary" onclick="window.print()">打印试卷</button>
+    <button class="btn btn-outline" onclick="toggleAnswers()">查看答案</button>
+  </div>
+</div>
+
+<!-- Practice Mode -->
+<div class="practice-area hidden" id="practiceMode">
+  <div class="practice-header">
+    <div class="practice-stats">
+      <div class="stat"><div class="stat-value" id="statAnswered">0</div><div class="stat-label">已答</div></div>
+      <div class="stat"><div class="stat-value" id="statCorrect">0</div><div class="stat-label">正确</div></div>
+      <div class="stat"><div class="stat-value" id="statAccuracy">0%</div><div class="stat-label">正确率</div></div>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+  </div>
+  <div id="questionList"></div>
+  <div class="action-row">
+    <button class="btn btn-success" id="btnSubmit" onclick="submitAnswers()">交卷</button>
+    <button class="btn btn-outline" id="btnReset" onclick="resetQuiz()">重新开始</button>
+  </div>
+  <div class="result-panel hidden" id="resultPanel">
+    <div>练习完成！</div>
+    <div class="score-big" id="finalScore">0 / 0</div>
+    <div class="result-detail" id="finalDetail"></div>
+    <button class="btn btn-primary" onclick="resetQuiz()">再做一次</button>
+  </div>
+</div>
+
+<script>
+// ====== Question Data ======
+// This will be replaced with actual question data when generating the page
+const QUESTION_DATA = {
+  title: "练习题",
+  subject: "math",
+  questions: [
+    {
+      id: 1,
+      type: "add",
+      expr: "12 + 7 =",
+      answer: "19",
+      userAnswer: ""
+    }
+  ]
+};
+
+// ====== Global State ======
+let timerInterval = null;
+let secondsElapsed = 0;
+let submissionFrozen = false;
+
+// ====== Mode Switching ======
+function switchMode(mode) {
+  const printEl = document.getElementById('printMode');
+  const practiceEl = document.getElementById('practiceMode');
+  const btnPrint = document.getElementById('btnPrintMode');
+  const btnPractice = document.getElementById('btnPracticeMode');
+
+  if (mode === 'print') {
+    printEl.classList.remove('hidden');
+    practiceEl.classList.add('hidden');
+    btnPrint.classList.add('active');
+    btnPractice.classList.remove('active');
+  } else {
+    printEl.classList.add('hidden');
+    practiceEl.classList.remove('hidden');
+    btnPrint.classList.remove('active');
+    btnPractice.classList.add('active');
+    if (!submissionFrozen) renderQuestions();
+  }
+}
+
+// ====== Toggle Answers ======
+let answersVisible = false;
+function toggleAnswers() {
+  answersVisible = !answersVisible;
+  document.getElementById('printAnswerArea').style.display = answersVisible ? 'block' : 'none';
+}
+
+// ====== Render Print Questions ======
+function renderPrintQuestions() {
+  const container = document.getElementById('printQuestions');
+  const answersEl = document.getElementById('printAnswers');
+  container.innerHTML = '';
+  answersEl.innerHTML = '';
+  const total = QUESTION_DATA.questions.length;
+  document.getElementById('printCount').textContent = total;
+
+  // 判断是否使用网格排版：纯计算题（expr + answer，无 choices/grid/prompt）用 3 列网格
+  const isCalculation = QUESTION_DATA.questions.every(q => !q.choices && !q.grid && !q.prompt && q.expr);
+  if (isCalculation && total >= 6) {
+    container.classList.add('grid-mode');
+  } else {
+    container.classList.remove('grid-mode');
+  }
+
+  QUESTION_DATA.questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'print-question';
+    div.innerHTML = `${i + 1}. ${renderQuestionText(q)}`;
+    container.appendChild(div);
+    const li = document.createElement('li');
+    li.textContent = `${i + 1}. ${q.answer}`;
+    answersEl.appendChild(li);
+  });
+}
+
+// ====== Render Question Text (data-driven) ======
+function renderQuestionText(q) {
+  // shape 类型优先返回标题，不展示原始 JSON
+  if (q.type === 'hundredChart') return '百数表';
+  if (q.type === 'triangle') return '三角形填数';
+  if (q.type === 'square') return '方形填数';
+  if (q.type === 'triangle-free') return '三角自由填';
+  if (q.grid) return '填数';
+  if (q.prompt) return q.prompt;
+  if (q.expr) {
+    let text = q.expr;
+    text = text.replace(/__+/g, '______').replace(/□+/g, '______');
+    return text;
+  }
+  if (q.pinyin && q.char) return `${q.pinyin}（ ）`;
+  if (q.char && !q.pinyin) return q.char;
+  if (q.word) return `${q.emoji || ''} ${q.zh || ''} → （ ）`;
+  if (q.upper) return `${q.upper} → （ ）`;
+  if (q.top) return `${q.top}\n${q.operator || '+'} ${q.bottom}\n————`;
+  return q.text || '题目';
+}
+
+// ====== Normalize Shape Answers ======
+// 将 answer 从 JSON 数组转换为逗号分隔字符串，便于判题比较
+function normalizeAnswer(q) {
+  if (q.type === 'hundredChart' || q.type === 'triangle' || q.type === 'square') {
+    try {
+      const ans = JSON.parse(q.answer);
+      if (Array.isArray(ans)) q.answer = ans.join(',');
+    } catch { /* 已是字符串，跳过 */ }
+  }
+}
+
+// ====== Shape Rendering (通用图形渲染框架) ======
+// 内置 grid / triangle / square 三种布局渲染器
+// 新增布局类型时在此添加新的渲染分支即可
+function renderShape(q, index) {
+  let data;
+  try {
+    data = JSON.parse(q.expr);
+  } catch {
+    return '<div class="q-answer-input"><input type="text" placeholder="输入答案" oninput="onTextInput(' + index + ', this.value)"></div>';
+  }
+
+  const type = q.type;
+
+  if (type === 'hundredChart') return renderGridShape(data, index);
+  if (type === 'triangle') return renderTriangleShape(data, index);
+  if (type === 'square') return renderSquareShape(data, index);
+  // triangle-free 暂用 triangle 渲染器
+  if (type === 'triangle-free') return renderTriangleShape(data, index);
+
+  return '<div class="q-answer-input"><input type="text" placeholder="输入答案" oninput="onTextInput(' + index + ', this.value)"></div>';
+}
+
+// Grid renderer (百数表等)
+function renderGridShape(data, index) {
+  const rows = data.rows || 3;
+  const cols = data.cols || 3;
+  const cellMap = data.cellMap || {};
+  const hiddenKeys = data.hiddenKeys || [];
+  const hiddenSet = new Set(hiddenKeys);
+
+  let html = '<div class="shape-grid" style="grid-template-columns: repeat(' + cols + ', 1fr);">';
+  let cellIndex = 0;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const key = r + ',' + c;
+      const value = cellMap[key];
+      const isHidden = hiddenSet.has(key);
+
+      if (value !== undefined && !isHidden) {
+        html += '<div class="shape-grid-cell known">' + value + '</div>';
+      } else {
+        html += '<div class="shape-grid-cell"><input type="number" placeholder="?" oninput="onShapeInput(' + index + ',' + cellIndex + ', this.value)"></div>';
+      }
+      cellIndex++;
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+// Triangle renderer (三角形填数等)
+// 布局:     A
+//          / \
+//        AB   AC
+//        /     \
+//       B — BC — C
+function renderTriangleShape(data, index) {
+  const vals = data.vals || {};
+  const shown = data.shown || [];
+  const hidden = data.hidden || [];
+  const target = data.target;
+
+  // 三角形顶点和中点坐标（百分比定位）
+  const positions = {
+    'A':   { left: '50%', top: '6%' },
+    'AB':  { left: '25%', top: '42%' },
+    'AC':  { left: '75%', top: '42%' },
+    'B':   { left: '8%', top: '92%' },
+    'BC':  { left: '50%', top: '92%' },
+    'C':   { left: '92%', top: '92%' },
+  };
+
+  let html = '<div class="shape-triangle">';
+  // 画三角形边框
+  html += '<div class="shape-triangle-line" style="left: 8%; right: 8%; bottom: 4%;"></div>'; // BC
+  html += '<div class="shape-triangle-line" style="left: 50%; top: 6%; width: 2px; height: calc(92% - 6%); transform: translateX(-50%) rotate(26deg); transform-origin: top;"></div>'; // AC
+  html += '<div class="shape-triangle-line" style="left: 50%; top: 6%; width: 2px; height: calc(92% - 6%); transform: translateX(-50%) rotate(-26deg); transform-origin: top;"></div>'; // AB
+
+  let cellIndex = 0;
+  Object.keys(positions).forEach(key => {
+    const pos = positions[key];
+    const isShown = shown.includes(key);
+    const value = vals[key];
+    const style = 'left: ' + pos.left + '; top: ' + pos.top + '; transform: translate(-50%, -50%);';
+
+    if (isShown && value !== undefined) {
+      html += '<div class="shape-triangle-cell known" style="' + style + '">' + value + '</div>';
+    } else {
+      html += '<div class="shape-triangle-cell" style="' + style + '"><input type="number" placeholder="?" oninput="onShapeInput(' + index + ',' + cellIndex + ', this.value)"></div>';
+    }
+    cellIndex++;
+  });
+
+  html += '</div>';
+  if (target) {
+    html += '<div class="shape-target">每边之和 = ' + target + '</div>';
+  }
+  return html;
+}
+
+// Square renderer (方形填数等)
+// 布局: A — AB — B
+//       |        |
+//       DA      BC
+//       |        |
+//       D — CD — C
+function renderSquareShape(data, index) {
+  const vals = data.vals || {};
+  const shown = data.shown || [];
+  const hidden = data.hidden || [];
+  const target = data.target;
+
+  // 方形顶点和边中点坐标
+  const positions = {
+    'A':  { left: '8%',  top: '8%'  },
+    'B':  { left: '92%', top: '8%'  },
+    'C':  { left: '92%', top: '92%' },
+    'D':  { left: '8%',  top: '92%' },
+    'AB': { left: '50%', top: '8%'  },
+    'BC': { left: '92%', top: '50%' },
+    'CD': { left: '50%', top: '92%' },
+    'DA': { left: '8%',  top: '50%' },
+  };
+
+  let html = '<div class="shape-square">';
+  // 画方形边框
+  html += '<div class="shape-square-line" style="left: 8%; right: 8%; top: 8%;"></div>'; // AB
+  html += '<div class="shape-square-line" style="right: 8%; top: 8%; bottom: 8%; width: 2px;"></div>'; // BC
+  html += '<div class="shape-square-line" style="left: 8%; right: 8%; bottom: 8%;"></div>'; // CD
+  html += '<div class="shape-square-line" style="left: 8%; top: 8%; bottom: 8%; width: 2px;"></div>'; // DA
+
+  let cellIndex = 0;
+  Object.keys(positions).forEach(key => {
+    const pos = positions[key];
+    const isShown = shown.includes(key);
+    const value = vals[key];
+    const style = 'left: ' + pos.left + '; top: ' + pos.top + '; transform: translate(-50%, -50%);';
+
+    if (isShown && value !== undefined) {
+      html += '<div class="shape-square-cell known" style="' + style + '">' + value + '</div>';
+    } else {
+      html += '<div class="shape-square-cell" style="' + style + '"><input type="number" placeholder="?" oninput="onShapeInput(' + index + ',' + cellIndex + ', this.value)"></div>';
+    }
+    cellIndex++;
+  });
+
+  html += '</div>';
+  if (target) {
+    html += '<div class="shape-target">每边之和 = ' + target + '</div>';
+  }
+  return html;
+}
+
+// Shape input handler (多输入框 → 逗号分隔存储)
+function onShapeInput(qIndex, cellIndex, value) {
+  if (submissionFrozen) return;
+  const q = QUESTION_DATA.questions[qIndex];
+  if (!q.userAnswer) q.userAnswer = '';
+  const values = q.userAnswer.split(',');
+  while (values.length <= cellIndex) values.push('');
+  values[cellIndex] = value;
+  q.userAnswer = values.join(',');
+  updateStats();
+}
+
+// ====== Render Practice Questions ======
+function renderQuestions() {
+  const container = document.getElementById('questionList');
+  container.innerHTML = '';
+  QUESTION_DATA.questions.forEach(normalizeAnswer);
+  QUESTION_DATA.questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    let answerArea = '';
+    const qNum = `第 ${i + 1} 题`;
+    const qBody = renderQuestionText(q);
+
+    if (q.choices && Array.isArray(q.choices)) {
+      answerArea = '<div class="choice-row">';
+      q.choices.forEach(c => {
+        const val = String(c);
+        const isCorrect = val === String(q.answer);
+        answerArea += `<button class="choice-btn" onclick="selectChoice(${i}, '${val.replace(/'/g, "\\'")}', this)" data-correct="${isCorrect}">${c}</button>`;
+      });
+      answerArea += '</div>';
+    } else if (q.type === 'hundredChart' || q.type === 'triangle' || q.type === 'square' || q.type === 'triangle-free') {
+      answerArea = renderShape(q, i);
+    } else if (q.grid) {
+      answerArea = '<div class="q-answer-input"><input type="number" placeholder="输入数字" oninput="onTextInput(' + i + ', this.value)"></div>';
+    } else {
+      answerArea = '<div class="q-answer-input"><input type="text" placeholder="输入答案" oninput="onTextInput(' + i + ', this.value)"></div>';
+    }
+
+    card.innerHTML = `<div class="q-num">${qNum}</div><div class="q-body">${qBody}</div>${answerArea}`;
+    container.appendChild(card);
+  });
+  updateStats();
+}
+
+// ====== Answer Input Handlers ======
+function onTextInput(index, value) {
+  if (submissionFrozen) return;
+  QUESTION_DATA.questions[index].userAnswer = value;
+  updateStats();
+}
+
+function selectChoice(index, value, btnEl) {
+  if (submissionFrozen) return;
+  QUESTION_DATA.questions[index].userAnswer = value;
+  const card = btnEl.closest('.question-card');
+  const buttons = card.querySelectorAll('.choice-btn');
+  buttons.forEach(b => b.classList.remove('selected'));
+  btnEl.classList.add('selected');
+  updateStats();
+}
+
+// ====== Stats Update ======
+function updateStats() {
+  const total = QUESTION_DATA.questions.length;
+  const answered = QUESTION_DATA.questions.filter(q => q.userAnswer !== '').length;
+  const correct = QUESTION_DATA.questions.filter(q => q.userAnswer !== '' && String(q.userAnswer).trim() === String(q.answer).trim()).length;
+  const accuracy = total > 0 ? Math.round(correct / total * 100) : 0;
+  document.getElementById('statAnswered').textContent = answered;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statAccuracy').textContent = accuracy + '%';
+}
+
+// ====== Timer ======
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  secondsElapsed = 0;
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    const m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+    const s = (secondsElapsed % 60).toString().padStart(2, '0');
+    document.getElementById('timer').textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+// ====== Submit & Grade ======
+function submitAnswers() {
+  if (submissionFrozen) return;
+  submissionFrozen = true;
+  stopTimer();
+
+  const total = QUESTION_DATA.questions.length;
+  let correct = 0;
+  QUESTION_DATA.questions.forEach((q, i) => {
+    const isCorrect = String(q.userAnswer || '').trim() === String(q.answer).trim();
+    if (isCorrect) correct++;
+    const card = document.getElementById('questionList').children[i];
+    if (card) {
+      const input = card.querySelector('input');
+      if (input) {
+        input.disabled = true;
+        input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+        input.style.backgroundColor = isCorrect ? '#dcfce7' : '#fee2e2';
+      }
+      const btns = card.querySelectorAll('.choice-btn');
+      btns.forEach(b => {
+        b.disabled = true;
+        const val = b.textContent;
+        if (val === String(q.answer)) b.classList.add('correct');
+        else if (b.classList.contains('selected')) b.classList.add('wrong');
+      });
+    }
+  });
+
+  document.getElementById('finalScore').textContent = `${correct} / ${total}`;
+  const minutes = Math.floor(secondsElapsed / 60);
+  const seconds = secondsElapsed % 60;
+  document.getElementById('finalDetail').textContent =
+    `用时 ${minutes}分${seconds}秒，正确率 ${Math.round(correct/total*100)}%`;
+  document.getElementById('resultPanel').classList.remove('hidden');
+  document.getElementById('btnSubmit').disabled = true;
+}
+
+// ====== Reset ======
+function resetQuiz() {
+  submissionFrozen = false;
+  QUESTION_DATA.questions.forEach(q => q.userAnswer = '');
+  document.getElementById('resultPanel').classList.add('hidden');
+  document.getElementById('btnSubmit').disabled = false;
+  document.getElementById('questionList').innerHTML = '';
+  renderQuestions();
+  startTimer();
+}
+
+// ====== Init ======
+function init() {
+  document.getElementById('printTitle').textContent = QUESTION_DATA.title || '练习题';
+  document.getElementById('modeInfo').textContent = `${QUESTION_DATA.subject || ''} · ${QUESTION_DATA.questions.length} 题`;
+  QUESTION_DATA.questions.forEach(normalizeAnswer);
+  renderPrintQuestions();
+  renderQuestions();
+  startTimer();
+}
+
+// Start when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
